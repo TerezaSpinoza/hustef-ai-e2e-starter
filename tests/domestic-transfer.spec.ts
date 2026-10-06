@@ -12,7 +12,9 @@ test.describe('Domestic transfer', () => {
     await new LoginPage(page).signInAsTestUser();
   });
 
-  test('Successful transfer shows confirmation and updates the balance', async ({ page }) => {
+  test('Successful transfer shows confirmation and updates the balance', async ({ page, gremlinRelease }) => {
+    // BUG: fee is 3% instead of 0.3% on release 3: expected fee 200 HUF (0.3% of 15,000 = 45, minimum 200) and balance 1,234,800 HUF, observed fee 450 HUF and balance 1,234,550 HUF. Not healed, see heal-report.json.
+    test.fail(gremlinRelease === 3, 'BUG: fee 450 HUF instead of 200 HUF for a 15,000 HUF transfer on release 3');
     const review = new ReviewPage(page);
     const dashboard = new DashboardPage(page);
 
@@ -43,7 +45,7 @@ test.describe('Domestic transfer', () => {
     // 1. Open /transfer and select Continue with all fields empty.
     await transfer.goto();
     await transfer.continueButton.click();
-    await expect(page.getByText('Enter a beneficiary name.')).toBeVisible();
+    await expect(page.getByText('Enter a payee name.')).toBeVisible();
     await expect(page.getByText('Check the IBAN first.')).toBeVisible();
     await expect(page.getByText('Enter an amount greater than 0.')).toBeVisible();
     await expect(page).toHaveURL(/\/transfer$/);
@@ -79,7 +81,9 @@ test.describe('Domestic transfer', () => {
   ] as const;
 
   for (const { from, amount, fee, total } of feeExamples) {
-    test(`Fee for ${amount} HUF from ${from} is ${fee}`, async ({ page }) => {
+    test(`Fee for ${amount} HUF from ${from} is ${fee}`, async ({ page, gremlinRelease }) => {
+      // BUG: fee is 3% instead of 0.3% on release 3: expected the fee in the table (0.3% of the amount, min 200, max 6,000 HUF), observed (60,000 -> 1,800 instead of 200; 70,000 -> 2,100 instead of 210; 100,000 -> 3,000 instead of 300; 2,000,000 -> 60,000 instead of 6,000). Not healed, see heal-report.json.
+      test.fail(gremlinRelease === 3, `BUG: fee for ${amount} HUF is not ${fee} on release 3 (fee rule 0.3%, min 200, max 6,000 HUF)`);
       const review = new ReviewPage(page);
       await new TransferPage(page).submit({ from, amount });
       await expect(review.heading).toBeVisible();

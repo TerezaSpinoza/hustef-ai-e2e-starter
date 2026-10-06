@@ -8,10 +8,15 @@ export class LoginPage {
   readonly alert: Locator;
 
   constructor(readonly page: Page) {
-    this.username = page.getByRole('textbox', { name: 'Username' });
+    this.username = page.getByRole('textbox', { name: 'User ID' });
     this.password = page.getByRole('textbox', { name: 'Password' });
-    this.signInButton = page.getByRole('button', { name: 'Sign in' });
+    this.signInButton = page.getByRole('button', { name: 'Log in' });
     this.alert = page.getByRole('alert');
+    // Later releases show a cookie dialog that must be answered first.
+    const cookieDialog = page.getByRole('dialog', { name: 'Cookies' });
+    void page.addLocatorHandler(cookieDialog, async () => {
+      await cookieDialog.getByRole('button', { name: 'Only necessary' }).click();
+    });
   }
 
   async goto(): Promise<void> {

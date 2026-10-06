@@ -21,7 +21,10 @@ test.describe('Dashboard', () => {
     await expect(savings).toContainText('HU03 9992 0265 2718 2818 2845 9043');
     await expect(savings).toContainText('5,400,000 HUF');
 
-    await expect(dashboard.newTransferLink).toHaveAttribute('href', '/transfer');
+    await dashboard.openPaymentsMenu();
+    await expect(dashboard.newTransferLink).toBeVisible();
+    await dashboard.newTransferLink.click();
+    await expect(page).toHaveURL(/\/transfer$/);
   });
 
   test('Recent transactions table lists five entries newest first', async ({ page }) => {
