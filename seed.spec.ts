@@ -6,10 +6,14 @@ import { test, expect, env } from './tests/fixtures';
 
 test.describe('Gremlin Bank', () => {
   test('seed', async ({ page }) => {
+    const cookieDialog = page.getByRole('dialog', { name: 'Cookies' });
+    await page.addLocatorHandler(cookieDialog, async () => {
+      await cookieDialog.getByRole('button', { name: 'Only necessary' }).click();
+    });
     await page.goto('/login');
-    await page.getByRole('textbox', { name: 'Username' }).fill(env('GREMLIN_USER'));
+    await page.getByRole('textbox', { name: 'User ID' }).fill(env('GREMLIN_USER'));
     await page.getByRole('textbox', { name: 'Password' }).fill(env('GREMLIN_PASSWORD'));
-    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.getByRole('button', { name: 'Log in' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Accounts' })).toBeVisible();
   });
 });

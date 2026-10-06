@@ -14,13 +14,21 @@ export class DashboardPage {
     this.loadingAccounts = page.getByText('Loading accounts...');
     this.signedInAs = page.getByText('Signed in as');
     this.signOutButton = page.getByRole('button', { name: 'Sign out' });
-    this.newTransferLink = page.getByRole('link', { name: 'New transfer' });
+    this.newTransferLink = page.getByRole('menuitem', { name: 'New transfer' });
     // The first row is the header row.
     this.recentTransactionRows = page.getByRole('table', { name: 'Recent transactions' }).getByRole('row');
   }
 
-  /** The account card (region) with the given account name as its heading. */
+  /** The New transfer link moved into the Payments menu: open the menu first. */
+  async openPaymentsMenu(): Promise<void> {
+    await this.page.getByRole('button', { name: 'Payments' }).click();
+  }
+
+  /** The row of the "Your accounts" table with the given account name. */
   account(name: AccountName): Locator {
-    return this.page.getByRole('region').filter({ has: this.page.getByRole('heading', { name }) });
+    return this.page
+      .getByRole('table', { name: 'Your accounts' })
+      .getByRole('row')
+      .filter({ has: this.page.getByRole('rowheader', { name, exact: true }) });
   }
 }
